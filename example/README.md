@@ -1,97 +1,146 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# react-native-kiosk-lite
 
-# Getting Started
+A lightweight React Native module that simulates kiosk mode on Android — no device owner or system privileges required.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+---
 
-## Step 1: Start Metro
+## ✨ Features
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- Enables immersive fullscreen mode (hides navigation & status bars)
+- Blocks the Android hardware back button
+- Detects when the app goes to background and brings it back to foreground
+- Simple API: `lock()`, `unlock()`, `bringToFront()`
+- Pure JavaScript wrapper included for easy integration
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+> ⚠️ iOS is **not supported** for kiosk behavior due to system limitations, but safe stub methods are included.
 
-```sh
-# Using npm
-npm start
+---
 
-# OR using Yarn
-yarn start
-```
-
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
+## 📦 Installation
 
 ```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+npm install react-native-kiosk-lite
+# or
+yarn add react-native-kiosk-lite
 ```
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+Make sure to run:
 
 ```sh
-bundle install
+npx pod-install
 ```
 
-Then, and every time you update your native dependencies, run:
+For Android, no extra setup is required if you're using autolinking.
 
-```sh
-bundle exec pod install
+---
+
+## 🚀 Usage Example: `KioskLock` Component
+
+You can use this drop-in component to activate kiosk mode automatically:
+
+```tsx
+import { useEffect } from 'react';
+import { AppState, BackHandler } from 'react-native';
+import * as KioskLite from 'react-native-kiosk-lite';
+
+type Props = {
+  autoUnlock?: boolean; // if false, stays locked after unmount
+};
+
+/**
+ * Activates kiosk lock mode:
+ * - Enables immersive UI
+ * - Blocks back button
+ * - Monitors backgrounding and brings app to front
+ */
+const KioskLock = ({ autoUnlock = true }: Props) => {
+  useEffect(() => {
+    // Enable immersive mode
+    KioskLite.lock();
+
+    // Block back button
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => true
+    );
+
+    // Bring app to front if backgrounded
+    const appStateListener = AppState.addEventListener('change', (state) => {
+      if (state === 'background') {
+        setTimeout(() => {
+          KioskLite.bringToFront();
+        }, 500);
+      }
+    });
+
+    return () => {
+      backHandler.remove();
+      appStateListener.remove();
+      if (autoUnlock) {
+        KioskLite.unlock();
+      }
+    };
+  }, [autoUnlock]);
+
+  return null;
+};
+
+export default KioskLock;
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+Then in your `App.tsx`:
 
-```sh
-# Using npm
-npm run ios
+```tsx
+import React from 'react';
+import { View, Text } from 'react-native';
+import KioskLock from './KioskLock'; // or from your utils
 
-# OR using Yarn
-yarn ios
+const App = () => (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <KioskLock />
+    <Text>Kiosk Mode Enabled</Text>
+  </View>
+);
+
+export default App;
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+---
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## 🧪 API
 
-## Step 3: Modify your app
+```ts
+KioskLite.lock(): void
+KioskLite.unlock(): void
+KioskLite.bringToFront(): void
+```
 
-Now that you have successfully run the app, let's make changes!
+---
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+## 📱 Platform Support
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+| Platform | Support           |
+| -------- | ----------------- |
+| Android  | ✅ Yes            |
+| iOS      | 🚫 No (stub only) |
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+---
 
-## Congratulations! :tada:
+## 🧩 Roadmap Ideas
 
-You've successfully run and modified your React Native App. :partying_face:
+- [ ] Foreground Service support
+- [ ] PIN-protected unlock
+- [ ] Overlay blocker for status bar
+- [ ] Auto-return on timeout
 
-### Now what?
+---
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+## 📄 License
 
-# Troubleshooting
+MIT © [Anton Seagull](https://github.com/AntonSeagull)
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+---
 
-# Learn More
+## 🙌 Contributions Welcome
 
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+Feel free to open issues or pull requests to improve this module.
