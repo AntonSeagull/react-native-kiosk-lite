@@ -45,7 +45,7 @@ class KioskLiteModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun requestOverlayPermission() {
+ override fun requestOverlayPermission() {
     val context = reactApplicationContext
     if (!Settings.canDrawOverlays(context)) {
       val intent = Intent(
@@ -58,13 +58,13 @@ class KioskLiteModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun hasOverlayPermission(promise: Promise) {
+ override fun hasOverlayPermission(promise: Promise) {
     val granted = Settings.canDrawOverlays(reactApplicationContext)
     promise.resolve(granted)
   }
 
   @ReactMethod
-  fun createOverlay() {
+ override fun createOverlay() {
     if (!Settings.canDrawOverlays(reactApplicationContext)) return
     if (overlayView != null) return
 
@@ -92,7 +92,7 @@ class KioskLiteModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun removeOverlay() {
+  override fun removeOverlay() {
     overlayView?.let {
       val wm = reactApplicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
       wm.removeView(it)
