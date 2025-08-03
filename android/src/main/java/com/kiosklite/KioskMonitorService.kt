@@ -8,7 +8,7 @@ import androidx.core.app.NotificationCompat
 
 class KioskMonitorService : Service() {
   private val handler = Handler(Looper.getMainLooper())
-  private val checkInterval = 3000L
+  private val checkInterval = 1000L
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     startForeground(1, buildNotification())
@@ -16,13 +16,13 @@ class KioskMonitorService : Service() {
     return START_STICKY
   }
 
-  private fun monitorApp() {
+   private fun monitorApp() {
     handler.post(object : Runnable {
       override fun run() {
         if (!isAppInForeground()) {
-          val intent = Intent(this@KioskMonitorService, MainActivity::class.java)
-          intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-          startActivity(intent)
+          val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+          launchIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+          startActivity(launchIntent)
         }
         handler.postDelayed(this, checkInterval)
       }

@@ -1,5 +1,9 @@
-import { useEffect } from 'react';
+import {
+    useEffect,
+    useRef,
+} from 'react';
 
+import type { AppStateStatus } from 'react-native';
 import {
     AppState,
     BackHandler,
@@ -17,14 +21,18 @@ type Props = {
  * - Blocks back button
  * - Requests & creates overlay to block status bar swipe
  * - Monitors backgrounding and brings app to front
+ * - Reapplies overlay and lock() on app resume
  */
 const KioskLock = ({ autoUnlock = true }: Props) => {
+    const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+
     useEffect(() => {
-        if (Platform.OS === 'android') {
-            // Включаем immersive режим
+        if (Platform.OS !== 'android') return;
+
+        const initKiosk = () => {
+            KioskLite.startKioskMonitorService();
             KioskLite.lock();
 
-            // Проверка разрешения и создание overlay
             KioskLite.hasOverlayPermission().then((granted) => {
                 if (granted) {
                     KioskLite.createOverlay();
@@ -32,28 +40,33 @@ const KioskLock = ({ autoUnlock = true }: Props) => {
                     KioskLite.requestOverlayPermission();
                 }
             });
+        };
 
-            // Блокируем "назад"
-            const backHandler = BackHandler.addEventListener('hardwareBackPress', () => true);
+        initKiosk();
 
-            // Перевод в foreground при background'е
-            const appStateListener = AppState.addEventListener('change', (state) => {
-                if (state === 'background') {
-                    setTimeout(() => {
-                        KioskLite.bringToFront();
-                    }, 500);
-                }
-            });
+        // Блокируем "назад"
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', () => true);
 
-            return () => {
-                backHandler.remove();
-                appStateListener.remove();
-                if (autoUnlock) {
-                    KioskLite.unlock();
-                    KioskLite.removeOverlay?.();
-                }
-            };
-        }
+        // Следим за переходами между фоном и активностью
+        const appStateListener = AppState.addEventListener('change', (nextAppState) => {
+            const prevState = appStateRef.current;
+            appStateRef.current = nextAppState;
+
+            if (prevState === 'background' && nextAppState === 'active') {
+                initKiosk();
+            }
+        });
+
+        return () => {
+            backHandler.remove();
+
+            appStateListener.remove();
+            if (autoUnlock) {
+                KioskLite.stopKioskMonitorService();
+                KioskLite.unlock();
+                KioskLite.removeOverlay?.();
+            }
+        };
     }, [autoUnlock]);
 
     return null;

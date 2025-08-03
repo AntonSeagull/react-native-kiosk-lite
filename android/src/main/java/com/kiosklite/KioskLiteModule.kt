@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.PixelFormat
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import android.provider.Settings
 import android.view.Gravity
 import android.view.View
@@ -91,8 +92,8 @@ override fun stopKioskMonitorService() {
         if (overlayView != null) return
 
         val overlay = View(reactApplicationContext)
-        overlay.setBackgroundColor(Color.parseColor("#88FF0000"))
-
+       // overlay.setBackgroundColor(Color.parseColor("#88FF0000"))
+        overlay.setBackgroundColor(Color.TRANSPARENT)
         overlay.setOnTouchListener { _, event ->
             Log.d("Overlay", "Touch event: ${event.action}")
             true
