@@ -34,15 +34,20 @@ class KioskLiteModule(reactContext: ReactApplicationContext) :
     disableImmersiveMode()
   }
 
-  @ReactMethod
-  override fun bringToFront() {
-    val activity: Activity? = currentActivity
-    if (activity != null) {
-      val intent = Intent(activity, activity::class.java)
-      intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_NEW_TASK)
-      activity.startActivity(intent)
-    }
+@ReactMethod
+override fun bringToFront() {
+  val context = reactApplicationContext
+  val packageManager = context.packageManager
+  val intent = packageManager.getLaunchIntentForPackage(context.packageName)
+
+  if (intent != null) {
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP)
+    context.startActivity(intent)
   }
+}
 
   @ReactMethod
  override fun requestOverlayPermission() {
