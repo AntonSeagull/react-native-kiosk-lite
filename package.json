@@ -148,6 +148,11 @@
       ]
     ]
   },
+  "react-native": {
+    "android": {
+      "packageName": "com.kiosklite"
+    }
+  },
   "codegenConfig": {
     "name": "KioskLiteSpec",
     "type": "modules",
