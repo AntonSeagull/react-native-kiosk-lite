@@ -69,32 +69,58 @@ override fun bringToFront() {
   }
 
   @ReactMethod
- override fun createOverlay() {
-    if (!Settings.canDrawOverlays(reactApplicationContext)) return
-    if (overlayView != null) return
-
-    val overlay = View(reactApplicationContext)
-    overlay.setBackgroundColor(Color.TRANSPARENT)
-
-    val params = WindowManager.LayoutParams(
-      WindowManager.LayoutParams.MATCH_PARENT,
-      150, // высота, закрывающая статус-бар
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-      else
-        WindowManager.LayoutParams.TYPE_PHONE,
-      WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-      PixelFormat.TRANSLUCENT
-    )
-
-    params.gravity = Gravity.TOP
-
-    val wm = reactApplicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    wm.addView(overlay, params)
-    overlayView = overlay
+override fun startKioskMonitorService() {
+  val context = reactApplicationContext
+  val intent = Intent(context, KioskMonitorService::class.java)
+  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    context.startForegroundService(intent)
+  } else {
+    context.startService(intent)
   }
+}
+
+@ReactMethod
+override fun stopKioskMonitorService() {
+  val context = reactApplicationContext
+  val intent = Intent(context, KioskMonitorService::class.java)
+  context.stopService(intent)
+}
+  @ReactMethod
+    override fun createOverlay() {
+        if (!Settings.canDrawOverlays(reactApplicationContext)) return
+        if (overlayView != null) return
+
+        val overlay = View(reactApplicationContext)
+        overlay.setBackgroundColor(Color.parseColor("#88FF0000"))
+
+        overlay.setOnTouchListener { _, event ->
+            Log.d("Overlay", "Touch event: ${event.action}")
+            true
+        }
+        overlay.isClickable = true
+        overlay.isFocusable = true
+
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            50, 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            else
+                WindowManager.LayoutParams.TYPE_PHONE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+                    WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            PixelFormat.TRANSLUCENT
+        )
+
+        params.gravity = Gravity.TOP
+
+        val wm = reactApplicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        wm.addView(overlay, params)
+        overlayView = overlay
+    }
 
   @ReactMethod
   override fun removeOverlay() {

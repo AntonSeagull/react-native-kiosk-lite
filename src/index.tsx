@@ -27,3 +27,10 @@ export function requestOverlayPermission(): void {
 export function hasOverlayPermission(): Promise<boolean> {
   return KioskLite.hasOverlayPermission();
 }
+
+export function startKioskMonitorService(): void {
+  KioskLite.startKioskMonitorService();
+}
+export function stopKioskMonitorService(): void {
+  KioskLite.stopKioskMonitorService();
+}

@@ -11,6 +11,9 @@ export interface Spec extends TurboModule {
 
   requestOverlayPermission(): void;
   hasOverlayPermission(): Promise<boolean>;
+
+  startKioskMonitorService(): void;
+  stopKioskMonitorService(): void;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('KioskLite');
