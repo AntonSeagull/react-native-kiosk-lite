@@ -1,36 +1,40 @@
 import KioskLite from './NativeKioskLite';
 
 export function lock(): void {
-  KioskLite.lock();
+  KioskLite?.lock();
 }
 
 export function unlock(): void {
-  KioskLite.unlock();
+  KioskLite?.unlock();
 }
 
 export function bringToFront(): void {
-  KioskLite.bringToFront();
+  KioskLite?.bringToFront();
 }
 
 export function createOverlay(): void {
-  KioskLite.createOverlay();
+  KioskLite?.createOverlay();
 }
 
 export function removeOverlay(): void {
-  KioskLite.removeOverlay();
+  KioskLite?.removeOverlay();
 }
 
 export function requestOverlayPermission(): void {
-  KioskLite.requestOverlayPermission();
+  KioskLite?.requestOverlayPermission();
 }
 
 export function hasOverlayPermission(): Promise<boolean> {
-  return KioskLite.hasOverlayPermission();
+  if (KioskLite?.hasOverlayPermission) {
+    return KioskLite.hasOverlayPermission();
+  } else {
+    return Promise.resolve(false);
+  }
 }
 
 export function startKioskMonitorService(): void {
-  KioskLite.startKioskMonitorService();
+  KioskLite?.startKioskMonitorService();
 }
 export function stopKioskMonitorService(): void {
-  KioskLite.stopKioskMonitorService();
+  KioskLite?.stopKioskMonitorService();
 }

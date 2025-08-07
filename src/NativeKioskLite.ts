@@ -1,5 +1,8 @@
 import type { TurboModule } from 'react-native';
-import { TurboModuleRegistry } from 'react-native';
+import {
+  Platform,
+  TurboModuleRegistry,
+} from 'react-native';
 
 export interface Spec extends TurboModule {
   lock(): void;
@@ -16,4 +19,9 @@ export interface Spec extends TurboModule {
   stopKioskMonitorService(): void;
 }
 
-export default TurboModuleRegistry.getEnforcing<Spec>('KioskLite');
+const KioskLite =
+  Platform.OS === 'android'
+    ? TurboModuleRegistry.getEnforcing<Spec>('KioskLite')
+    : null;
+
+export default KioskLite;
